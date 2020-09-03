@@ -8,7 +8,7 @@ import LogoVaiBem from '@public/dist/img/logo_roxa.png';
 const Home = () => {
 
     return (
-        <div>
+        <>
             <div className="content-wrapper">
                 <div className="content-header">
                     <div className="container-fluid">
@@ -56,7 +56,7 @@ const Home = () => {
                     </div>
                 </section>
             </div>
-        </div>
+        </>
     )
 }
 

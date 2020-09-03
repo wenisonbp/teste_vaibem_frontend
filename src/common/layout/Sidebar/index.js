@@ -7,7 +7,7 @@ import './style.css';
 const Sidebar = () => {
 
     return (
-        <div>
+        <>
             <aside className="main-sidebar elevation-4 sidebar-light-indigo">
                 <Link to="/user_equipe_eficiencia" className="brand-link navbar-indigo">
                     <img src={LogoVivinho} className="brand-image" alt="LogoVivinho" />
@@ -44,7 +44,7 @@ const Sidebar = () => {
                     </nav>
                 </div>
             </aside>
-        </div>
+        </>
     );
 }
 

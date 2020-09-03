@@ -2,7 +2,7 @@
 
 import React, { useState } from 'react';
 import api from '@src/services/api';
-import { useHistory } from "react-router-dom";
+import { useHistory, Link } from "react-router-dom";
 import LogoVaiBem from '@public/dist/img/logo_vai_bem.png';
 import './style.css';
 
@@ -88,6 +88,9 @@ const Login = () => {
                             <div className="row">
                                 <div className="col-4">
                                     <button type="submit" className="btn btn-primary btn-block">Entrar</button>
+                                </div>
+                                <div className="col-6">
+                                    <Link to="/register" className="float-right">Não sou cadastratado</Link>
                                 </div>
                             </div>
                         </form>

@@ -9,7 +9,7 @@ import './style.css';
 const Tarefas = () => {
 
     return (
-        <div>
+        <>
             <div className="content-wrapper">
                 <div className="content-header">
                     <div className="container-fluid">
@@ -34,7 +34,7 @@ const Tarefas = () => {
                     </div>
                 </section>
             </div>
-        </div >
+        </ >
     )
 }
 

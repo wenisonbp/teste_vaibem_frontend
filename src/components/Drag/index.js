@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { DragDropContext, Droppable, Draggable } from 'react-beautiful-dnd';
 import Modal from 'react-modal';
+import api from '@src/services/api';
 import moment from 'moment';
 import { stages } from '@src/data';
 import { Link } from 'react-router-dom';
@@ -8,7 +9,7 @@ import { toast } from 'react-toastify';
 import 'react-toastify/dist/ReactToastify.css';
 import { confirmAlert } from 'react-confirm-alert';
 import 'react-confirm-alert/src/react-confirm-alert.css';
-import api from '@src/services/api';
+import './style.css';
 
 moment.locale('pt-br');
 
@@ -42,6 +43,8 @@ const QuoteApp = () => {
     const [fieldsTasksAlter, setFieldsTasksAlter] = useState({});
 
     const [openIsModalAlter, setIsOpenModalAlter] = useState(false);
+
+    const [openIsModalAdd, setIsOpenModalAdd] = useState(false);
 
     const [dataTasks, setDataTasks] = useState(() => {
 
@@ -140,8 +143,20 @@ const QuoteApp = () => {
 
         } catch (error) {
 
-            localStorage.removeItem('token');
-            window.location.reload();
+            if (error.response.status === 401) {
+                localStorage.removeItem('token');
+                window.location.reload();
+            } else {
+                toast.error('Erro ao carregar as tarefas!', {
+                    position: "top-right",
+                    autoClose: 5000,
+                    hideProgressBar: false,
+                    closeOnClick: true,
+                    pauseOnHover: true,
+                    draggable: true,
+                    progress: undefined,
+                });
+            }
 
         }
 
@@ -163,16 +178,7 @@ const QuoteApp = () => {
                 }
             })
 
-
-            const modal = document.getElementById('addTaskModal');
-
-            modal.classList.remove('show');
-            modal.setAttribute('aria-hidden', 'true');
-            modal.setAttribute('style', 'display: none');
-            const modalBackdrops = document.getElementsByClassName('modal-backdrop');
-            document.body.removeChild(modalBackdrops[0]);
-
-            document.getElementById("form_add_task").reset();
+            closeModalAdd()
 
             let itemState = Object.assign(dataTasks['triagem']);
 
@@ -182,7 +188,6 @@ const QuoteApp = () => {
                 ...dataTasks,
                 ['triagem']: itemState
             })
-
 
             toast.success('Registro criado com sucesso!', {
                 position: "top-right",
@@ -196,8 +201,20 @@ const QuoteApp = () => {
 
         } catch (error) {
 
-            localStorage.removeItem('token');
-            window.location.reload();
+            if (error.response.status === 401) {
+                localStorage.removeItem('token');
+                window.location.reload();
+            } else {
+                toast.error('Erro ao criar o registro!', {
+                    position: "top-right",
+                    autoClose: 5000,
+                    hideProgressBar: false,
+                    closeOnClick: true,
+                    pauseOnHover: true,
+                    draggable: true,
+                    progress: undefined,
+                });
+            }
 
         }
 
@@ -271,23 +288,34 @@ const QuoteApp = () => {
 
             if (data.message === "Sucesso") {
 
-                const {alter_id, alter_stage, alter_title, alter_description} = fieldsTasksAlter;
+                const { alter_id, alter_stage, alter_title, alter_description } = fieldsTasksAlter;
+
                 let getList = dataTasks[alter_stage].filter(item => {
+                    return item.id !== alter_id
+                });
+
+                const sourceClone = Object.assign(getList);
+
+                let getItem = dataTasks[alter_stage].filter(item => {
                     return item.id === alter_id
                 });
 
-                getList.description = alter_description;
-                getList.title = alter_title;
+                let getIndex = dataTasks[alter_stage].findIndex(item => {
+                    return item.id === alter_id
+                });
 
-                console.log(alter_id)
-                console.log(getList)
+
+                getItem[0].description = alter_description;
+                getItem[0].title = alter_title;
+
+                sourceClone.splice(getIndex, 0, getItem[0]);
 
                 setDataTasks({
                     ...dataTasks,
-                    [source.droppableId]: items
+                    [alter_stage]: sourceClone
                 })
 
-                closeModalAlter()
+                closeModalAlter();
 
                 toast.success('Registro alterado com sucesso!', {
                     position: "top-right",
@@ -305,13 +333,11 @@ const QuoteApp = () => {
 
             }
 
-
-
         } catch (error) {
 
             if (error.response.status === 401) {
                 localStorage.removeItem('token');
-                window.location.reload();
+                window.location.href = "/login";
             } else {
                 toast.error('Erro ao salvar o registro!', {
                     position: "top-right",
@@ -325,7 +351,6 @@ const QuoteApp = () => {
             }
 
         }
-
 
     }
 
@@ -386,15 +411,20 @@ const QuoteApp = () => {
 
         } catch (error) {
 
-            toast.error('Erro na exclusão!', {
-                position: "top-right",
-                autoClose: 5000,
-                hideProgressBar: false,
-                closeOnClick: true,
-                pauseOnHover: true,
-                draggable: true,
-                progress: undefined,
-            });
+            if (error.response.status === 401) {
+                localStorage.removeItem('token');
+                window.location.href = "/login";
+            } else {
+                toast.error('Erro ao excluir o registro!', {
+                    position: "top-right",
+                    autoClose: 5000,
+                    hideProgressBar: false,
+                    closeOnClick: true,
+                    pauseOnHover: true,
+                    draggable: true,
+                    progress: undefined,
+                });
+            }
 
         }
 
@@ -406,76 +436,94 @@ const QuoteApp = () => {
 
     const onDragEnd = async result => {
 
-        const { source, destination, draggableId } = result;
+        try {
+
+            const { source, destination, draggableId } = result;
+
+            if (!destination) {
+                return;
+            }
+
+            let ckeckLogin = localStorage.getItem('token');
+
+            if (source.droppableId === destination.droppableId) {
+
+                let getList = dataTasks[source.droppableId];
 
 
-        if (!destination) {
-            return;
-        }
+                const items = reorder(
+                    getList,
+                    source.index,
+                    destination.index
+                );
 
-        let ckeckLogin = localStorage.getItem('token');
-
-        if (source.droppableId === destination.droppableId) {
-
-
-
-            let getList = dataTasks[source.droppableId];
-
-
-            const items = reorder(
-                getList,
-                source.index,
-                destination.index
-            );
-
-            setDataTasks({
-                ...dataTasks,
-                [source.droppableId]: items
-            })
+                setDataTasks({
+                    ...dataTasks,
+                    [source.droppableId]: items
+                })
 
 
-            const { data } = await api.post('/task_reorder_stage', {
-                stage: source.droppableId,
-                index: destination.index,
-                id: draggableId
-            }, {
-                headers: {
-                    'Authorization': `Bearer ${ckeckLogin}`
-                }
-            })
+                const { data } = await api.post('/task_reorder_stage', {
+                    stage: source.droppableId,
+                    new_index: destination.index,
+                    previous_index: source.index,
+                    id: draggableId
+                }, {
+                    headers: {
+                        'Authorization': `Bearer ${ckeckLogin}`
+                    }
+                })
 
-            console.log(data)
+            } else {
 
-        } else {
+                let getListSource = dataTasks[source.droppableId];
+                let getListDestination = dataTasks[destination.droppableId];
 
-            let getListSource = dataTasks[source.droppableId];
-            let getListDestination = dataTasks[destination.droppableId];
-
-            const result = move(
-                getListSource,
-                getListDestination,
-                source,
-                destination
-            );
-
-
-            setDataTasks({
-                ...dataTasks,
-                [source.droppableId]: result[source.droppableId],
-                [destination.droppableId]: result[destination.droppableId]
-            });
+                const result = move(
+                    getListSource,
+                    getListDestination,
+                    source,
+                    destination
+                );
 
 
-            const { data } = await api.post('/task_move_stage', {
-                stage: destination.droppableId,
-                index: destination.index,
-                id: draggableId
-            }, {
-                headers: {
-                    'Authorization': `Bearer ${ckeckLogin}`
-                }
-            })
+                setDataTasks({
+                    ...dataTasks,
+                    [source.droppableId]: result[source.droppableId],
+                    [destination.droppableId]: result[destination.droppableId]
+                });
 
+
+                const { data } = await api.post('/task_move_stage', {
+                    stage: destination.droppableId,
+                    index: destination.index,
+                    previous_index: source.index,
+                    previous_source: source.droppableId,
+                    id: draggableId
+                }, {
+                    headers: {
+                        'Authorization': `Bearer ${ckeckLogin}`
+                    }
+                })
+
+            }
+
+        } catch (error) {
+
+            if (error.response.status === 401) {
+                localStorage.removeItem('token');
+                window.location.href = "/login";
+            } else {
+                toast.error('Erro ao mover o registro!', {
+                    position: "top-right",
+                    autoClose: 5000,
+                    hideProgressBar: false,
+                    closeOnClick: true,
+                    pauseOnHover: true,
+                    draggable: true,
+                    progress: undefined,
+                });
+            }
         }
 
     };
@@ -504,6 +552,26 @@ const QuoteApp = () => {
         setIsOpenModalAlter(false);
     }
 
+    const openModalAdd = () => {
+
+        setIsOpenModalAdd(true);
+
+        setFieldsTasks({
+            ...fieldsTasks,
+            ['title']: '',
+            ['requester_name']: '',
+            ['requester_email']: '',
+            ['description']: '',
+            ['comment']: '',
+            ['due_date']: ''
+        })
+    }
+
+
+    const closeModalAdd = () => {
+        setIsOpenModalAdd(false);
+    }
+
     return (
         <>
             <DragDropContext onDragEnd={onDragEnd}>
@@ -522,7 +590,7 @@ const QuoteApp = () => {
                                             {
                                                 itensStage.create && (
 
-                                                    <Link to="#" className="float-right" data-toggle="modal" data-target="#addTaskModal">
+                                                    <Link to="#" className="float-right" onClick={openModalAdd}>
                                                         Novo
                                                         </Link>
                                                 )
@@ -576,49 +644,42 @@ const QuoteApp = () => {
                 }
             </DragDropContext>
 
-            <div className="modal fade" id="addTaskModal" tabIndex={-1} aria-labelledby="addTaskModalLabel" aria-hidden="true">
-                <div className="modal-dialog">
-                    <div className="modal-content">
-                        <div className="modal-header">
-                            <h5 className="modal-title" id="addTaskModalLabel">Nova tarefa</h5>
-                            <button type="button" className="close" data-dismiss="modal" aria-label="Close">
-                                <span aria-hidden="true">×</span>
-                            </button>
-                        </div>
-                        <div className="modal-body">
-                            <form onSubmit={createTask} id="form_add_task">
-                                <div className="form-group">
-                                    <label htmlFor="title" className="col-form-label">Título da tarefa:</label>
-                                    <input type="text" className="form-control" id="title" name="title" value={fieldsTasks.title} onChange={onChangeFieldsAddTask} required />
-                                </div>
-                                <div className="form-group">
-                                    <label htmlFor="requester_name" className="col-form-label">Nome do solicitante:</label>
-                                    <input type="text" className="form-control" id="requester_name" name="requester_name" value={fieldsTasks.requester_name} onChange={onChangeFieldsAddTask} required />
-                                </div>
-                                <div className="form-group">
-                                    <label htmlFor="requester_email" className="col-form-label">E-mail do solicitante:</label>
-                                    <input type="email" className="form-control" id="requester_email" name="requester_email" value={fieldsTasks.requester_email} onChange={onChangeFieldsAddTask} required />
-                                </div>
-                                <div className="form-group">
-                                    <label htmlFor="description" className="col-form-label">Descrição:</label>
-                                    <textarea className="form-control" id="description" name="description" value={fieldsTasks.description} onChange={onChangeFieldsAddTask} defaultValue={""} required />
-                                </div>
-                                <div className="form-group">
-                                    <label htmlFor="comment" className="col-form-label">Comentário:</label>
-                                    <textarea className="form-control" id="comment" name="comment" value={fieldsTasks.comment} onChange={onChangeFieldsAddTask} defaultValue={""} required />
-                                </div>
-                                <div className="form-group">
-                                    <label htmlFor="due_date" className="col-form-label">Prazo:</label>
-                                    <input type="datetime-local" className="form-control" id="due_date" name="due_date" min="1900-01-01T00:00" max="2099-12-31T00:00" value={fieldsTasks.due_date} onChange={onChangeFieldsAddTask} required />
-                                </div>
-                                <button type="button" className="btn btn-sm btn-secondary" data-dismiss="modal">Fechar</button>
-                                <button type="submit" className="btn btn-sm btn-success float-right">Salvar</button>
-                            </form>
-                        </div>
-                    </div>
-                </div>
-            </div>
 
+            <Modal
+                isOpen={openIsModalAdd}
+                onRequestClose={closeModalAdd}
+                style={customStyles}
+            >
+                <h2>Nova tarefa</h2>
+                <form onSubmit={createTask} id="form_add_task">
+                    <div className="form-group">
+                        <label htmlFor="title" className="col-form-label">Título da tarefa:</label>
+                        <input type="text" className="form-control" id="title" name="title" value={fieldsTasks.title} onChange={onChangeFieldsAddTask} required />
+                    </div>
+                    <div className="form-group">
+                        <label htmlFor="requester_name" className="col-form-label">Nome do solicitante:</label>
+                        <input type="text" className="form-control" id="requester_name" name="requester_name" value={fieldsTasks.requester_name} onChange={onChangeFieldsAddTask} required />
+                    </div>
+                    <div className="form-group">
+                        <label htmlFor="requester_email" className="col-form-label">E-mail do solicitante:</label>
+                        <input type="email" className="form-control" id="requester_email" name="requester_email" value={fieldsTasks.requester_email} onChange={onChangeFieldsAddTask} required />
+                    </div>
+                    <div className="form-group">
+                        <label htmlFor="description" className="col-form-label">Descrição:</label>
+                        <textarea className="form-control" id="description" name="description" value={fieldsTasks.description} onChange={onChangeFieldsAddTask} defaultValue={""} required />
+                    </div>
+                    <div className="form-group">
+                        <label htmlFor="comment" className="col-form-label">Comentário:</label>
+                        <textarea className="form-control" id="comment" name="comment" value={fieldsTasks.comment} onChange={onChangeFieldsAddTask} defaultValue={""} required />
+                    </div>
+                    <div className="form-group">
+                        <label htmlFor="due_date" className="col-form-label">Prazo:</label>
+                        <input type="datetime-local" className="form-control" id="due_date" name="due_date" min="1900-01-01T00:00" max="2099-12-31T00:00" value={fieldsTasks.due_date} onChange={onChangeFieldsAddTask} required />
+                    </div>
+                    <button type="button" className="btn btn-sm btn-secondary" onClick={closeModalAdd}>Fechar</button>
+                    <button type="submit" className="btn btn-sm btn-success float-right">Salvar</button>
+                </form>
+            </Modal>
 
             <Modal
                 isOpen={openIsModalAlter}

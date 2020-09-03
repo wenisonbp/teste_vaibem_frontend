@@ -16,7 +16,7 @@ const Navbar = () => {
                     label: 'Sim',
                     onClick: () => {
                         localStorage.removeItem('token');
-                        window.location.reload();
+                        window.location.href = "/login";
                     }
                 },
                 {
@@ -30,7 +30,7 @@ const Navbar = () => {
     };
 
     return (
-        <div>
+        <>
             <nav className="main-header navbar navbar-expand navbar-dark navbar-indigo">
                 <ul className="navbar-nav">
                     <li className="nav-item">
@@ -46,7 +46,7 @@ const Navbar = () => {
                     </li>
                 </ul>
             </nav>
-        </div>
+        </>
     );
 }
 
