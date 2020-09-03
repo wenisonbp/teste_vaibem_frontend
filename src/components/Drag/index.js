@@ -271,13 +271,21 @@ const QuoteApp = () => {
 
             if (data.message === "Sucesso") {
 
-                const {alter_id, alter_stage} = fieldsTasksAlter;
+                const {alter_id, alter_stage, alter_title, alter_description} = fieldsTasksAlter;
                 let getList = dataTasks[alter_stage].filter(item => {
                     return item.id === alter_id
                 });
 
+                getList.description = alter_description;
+                getList.title = alter_title;
+
                 console.log(alter_id)
                 console.log(getList)
+
+                setDataTasks({
+                    ...dataTasks,
+                    [source.droppableId]: items
+                })
 
                 closeModalAlter()
 
