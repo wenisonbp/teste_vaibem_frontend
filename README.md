@@ -9,9 +9,9 @@ Teste Vai Bem - Frontend
 ## Participantes
 
 
-| [<img src="https://avatars2.githubusercontent.com/u/44320625?s=460&u=2f8e3f8022f78fc086d838abcacda9f23d6c8c1d&v=4" width="75px;"/>](https://github.com/wenisonbp) | 
-| :------------------------------------------------------------------------------------------------------------------------: | :---------------------------------------------------------------------------------------------------------------------: |
-|                                     [Wenison Bandeira](https://github.com/wenisonbp)                                     |                                    
+[<img src="https://avatars2.githubusercontent.com/u/44320625?s=460&u=2f8e3f8022f78fc086d838abcacda9f23d6c8c1d&v=4" width="75px;"/>](https://github.com/wenisonbp)
+
+[Wenison Bandeira](https://github.com/wenisonbp)                                                                       
 
 ## Roteiro
 
