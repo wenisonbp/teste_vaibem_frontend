@@ -32,6 +32,6 @@ Teste Vai Bem - Frontend
 
 1. Clone este repositório;<br />
 2. Execute `npm ou yarn install` para a instalação das dependências do projeto;<br />
-3. O serviço estará disponível em `http://localhost:3333`.<br />
+3. O serviço estará disponível em `http://localhost:3000`.<br />
 
 
