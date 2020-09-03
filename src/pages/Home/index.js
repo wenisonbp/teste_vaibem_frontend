@@ -32,8 +32,8 @@ const Home = () => {
                                 <div className="jumbotron">
                                     <div style={{ textAlign: 'center' }}>
                                         <img className="img-acesso-negado" style={{ width: 100, paddingTop: 0 }} src={LogoVaiBem} alt="LogoVaiBem" />
-                                        <h1 className="display-4">Olá, Nome do usuário!</h1>
-                                        <p className="lead">Bem vindo ao <span style={{ fontWeight: 500 }}>Board Kanban - Vai Bem</span> , o que você deseja realizar hoje? Escolha uma das opções abaixo...</p>
+                                        <h1 className="display-4">Olá, bem vindo ao <span style={{ fontWeight: 500 }}>Board Kanban - Vai Bem</span>!</h1>
+                                        <p className="lead">O que você deseja realizar hoje? Escolha uma das opções abaixo...</p>
                                     </div>
                                     <hr className="my-4" />
                                     <div class="container">
@@ -47,18 +47,6 @@ const Home = () => {
                                                         <Link to="/tarefas" className="card-link float-right">Ir para</Link>
                                                     </div>
                                                 </div>
-
-                                            </div>
-                                            <div class="col-md-auto">
-                                                <div className="card card-home">
-                                                    <div className="card-body">
-                                                        <h5 className="card-title"><b>Dashboards</b></h5>
-                                                        <p className="card-text">Visualize as resultados das tratativas</p>
-                                                        <i class="fas fa-tachometer-alt"></i>
-                                                        <Link to="/dashboards" className="card-link float-right">Ir para</Link>
-                                                    </div>
-                                                </div>
-
                                             </div>
                                         </div>
                                     </div>

@@ -1,5 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { DragDropContext, Droppable, Draggable } from 'react-beautiful-dnd';
+import Modal from 'react-modal';
 import moment from 'moment';
 import { stages } from '@src/data';
 import { Link } from 'react-router-dom';
@@ -9,60 +10,29 @@ import { confirmAlert } from 'react-confirm-alert';
 import 'react-confirm-alert/src/react-confirm-alert.css';
 import api from '@src/services/api';
 
-moment.locale('pt-br')
+moment.locale('pt-br');
 
-// a little function to help us with reordering the result
-const reorder = (getList, startIndex, endIndex) => {
+toast.configure();
 
-    const result = Array.from(getList);
+Modal.setAppElement('#root');
 
-    const [removed] = result.splice(startIndex, 1);
 
-    result.splice(endIndex, 0, removed);
-
-    return result;
+const customStyles = {
+    content: {
+        top: '50%',
+        left: '50%',
+        right: 'auto',
+        bottom: 'auto',
+        minWidth: '50%',
+        marginRight: '-50%',
+        transform: 'translate(-50%, -50%)'
+    },
+    overlay: {
+        zIndex: 2000,
+        backgroundColor: 'rgba(0, 0, 0, 0.75)'
+    }
 };
 
-/**
- * Moves an item from one list to another list.
- */
-const move = (source, destination, droppableSource, droppableDestination) => {
-
-    const sourceClone = Object.assign(source, []);
-    const destClone = Object.assign(destination, []);
-    const [removed] = sourceClone.splice(droppableSource.index, 1);
-
-    removed.stage = droppableDestination.droppableId;
-
-    destClone.splice(droppableDestination.index, 0, removed);
-
-    const result = {};
-    result[droppableSource.droppableId] = sourceClone;
-    result[droppableDestination.droppableId] = destClone;
-
-    return result;
-};
-
-const grid = 8;
-
-const getItemStyle = (isDragging, draggableStyle) => ({
-    userSelect: 'none',
-    padding: 0,
-    margin: `0 0 ${grid}px 0`,
-    background: isDragging ? 'lightgreen' : '',
-    ...draggableStyle
-});
-
-const getListStyle = isDraggingOver => ({
-    background: isDraggingOver ? '#3329292b' : 'white',
-    padding: grid,
-    width: 250,
-    margin: 10
-});
-
-
-
-toast.configure()
 
 const QuoteApp = () => {
 
@@ -70,6 +40,8 @@ const QuoteApp = () => {
     const [fieldsTasks, setFieldsTasks] = useState({});
 
     const [fieldsTasksAlter, setFieldsTasksAlter] = useState({});
+
+    const [openIsModalAlter, setIsOpenModalAlter] = useState(false);
 
     const [dataTasks, setDataTasks] = useState(() => {
 
@@ -89,9 +61,55 @@ const QuoteApp = () => {
 
     useEffect(() => {
 
-        loadTasks()
+        loadTasks();
 
-    }, [])
+    }, []);
+
+
+    const reorder = (getList, startIndex, endIndex) => {
+
+        const result = Array.from(getList);
+
+        const [removed] = result.splice(startIndex, 1);
+
+        result.splice(endIndex, 0, removed);
+
+        return result;
+    };
+
+    const move = (source, destination, droppableSource, droppableDestination) => {
+
+        const sourceClone = Object.assign(source, []);
+        const destClone = Object.assign(destination, []);
+        const [removed] = sourceClone.splice(droppableSource.index, 1);
+
+        removed.stage = droppableDestination.droppableId;
+
+        destClone.splice(droppableDestination.index, 0, removed);
+
+        const result = {};
+        result[droppableSource.droppableId] = sourceClone;
+        result[droppableDestination.droppableId] = destClone;
+
+        return result;
+    };
+
+    const grid = 8;
+
+    const getItemStyle = (isDragging, draggableStyle) => ({
+        userSelect: 'none',
+        padding: 0,
+        margin: `0 0 ${grid}px 0`,
+        background: isDragging ? 'lightgreen' : '',
+        ...draggableStyle
+    });
+
+    const getListStyle = isDraggingOver => ({
+        background: isDraggingOver ? '#3329292b' : 'white',
+        padding: grid,
+        width: 250,
+        margin: 10
+    });
 
 
     const loadTasks = async () => {
@@ -128,7 +146,6 @@ const QuoteApp = () => {
         }
 
     }
-
 
     const createTask = async (e) => {
 
@@ -187,6 +204,122 @@ const QuoteApp = () => {
 
     }
 
+    const showTask = async (idTask) => {
+
+        let ckeckLogin = localStorage.getItem('token');
+
+        try {
+
+            const { data } = await api.get('/task_show/' + idTask, {
+                headers: {
+                    'Authorization': `Bearer ${ckeckLogin}`
+                }
+            })
+
+            setFieldsTasksAlter({
+                ...fieldsTasksAlter,
+                ['alter_id']: data.id,
+                ['alter_title']: data.title,
+                ['alter_requester_name']: data.requester_name,
+                ['alter_requester_email']: data.requester_email,
+                ['alter_description']: data.description,
+                ['alter_due_date']: moment(data.due_date).format('YYYY-MM-DDTHH:mm'),
+                ['alter_comment']: data.comment,
+                ['alter_stage']: data.stage
+            });
+
+            openModalAlter();
+
+        } catch (error) {
+
+            if (error.response.status === 401) {
+                localStorage.removeItem('token');
+                window.location.reload();
+            } else {
+                toast.error('Erro ao carregar o registro!', {
+                    position: "top-right",
+                    autoClose: 5000,
+                    hideProgressBar: false,
+                    closeOnClick: true,
+                    pauseOnHover: true,
+                    draggable: true,
+                    progress: undefined,
+                });
+            }
+
+        }
+
+
+    }
+
+    const updateTask = async (e) => {
+
+        e.preventDefault()
+
+        let ckeckLogin = localStorage.getItem('token');
+
+        try {
+
+            const { data } = await api.post('/task_update', {
+                fieldsTasksAlter
+            }, {
+                headers: {
+                    'Authorization': `Bearer ${ckeckLogin}`
+                }
+            })
+
+
+            if (data.message === "Sucesso") {
+
+                const {alter_id, alter_stage} = fieldsTasksAlter;
+                let getList = dataTasks[alter_stage].filter(item => {
+                    return item.id === alter_id
+                });
+
+                console.log(alter_id)
+                console.log(getList)
+
+                closeModalAlter()
+
+                toast.success('Registro alterado com sucesso!', {
+                    position: "top-right",
+                    autoClose: 5000,
+                    hideProgressBar: false,
+                    closeOnClick: true,
+                    pauseOnHover: true,
+                    draggable: true,
+                    progress: undefined,
+                });
+
+            } else {
+
+                throw new Error({ error: 'Falha ao criar o registro' });
+
+            }
+
+
+
+        } catch (error) {
+
+            if (error.response.status === 401) {
+                localStorage.removeItem('token');
+                window.location.reload();
+            } else {
+                toast.error('Erro ao salvar o registro!', {
+                    position: "top-right",
+                    autoClose: 5000,
+                    hideProgressBar: false,
+                    closeOnClick: true,
+                    pauseOnHover: true,
+                    draggable: true,
+                    progress: undefined,
+                });
+            }
+
+        }
+
+
+    }
 
     const deleteTask = async (idTask, stage) => {
 
@@ -262,7 +395,6 @@ const QuoteApp = () => {
 
 
     }
-
 
     const onDragEnd = async result => {
 
@@ -354,7 +486,15 @@ const QuoteApp = () => {
         })
     }
 
-    
+
+    const openModalAlter = () => {
+        setIsOpenModalAlter(true);
+    }
+
+
+    const closeModalAlter = () => {
+        setIsOpenModalAlter(false);
+    }
 
     return (
         <>
@@ -388,7 +528,7 @@ const QuoteApp = () => {
                                                 draggableId={item_2.id}
                                                 index={index}
                                                 indexBD={item_2.index}
-                                                >
+                                            >
                                                 {(provided, snapshot) => (
                                                     <div
                                                         ref={provided.innerRef}
@@ -402,7 +542,10 @@ const QuoteApp = () => {
                                                             <div className="card-body">
                                                                 <h5 className="card-title"><b>{item_2.title}</b></h5>
                                                                 <p className="card-text"> {item_2.description}</p>
-                                                                <Link to="#" className="card-link">Editar</Link>
+                                                                <Link to="#" className="card-link"
+                                                                    onClick={() => {
+                                                                        showTask(item_2.id)
+                                                                    }}>Editar</Link>
                                                                 <Link to="#" className="card-link pr-2"
                                                                     onClick={() => {
                                                                         deleteTask(item_2.id, item)
@@ -468,50 +611,45 @@ const QuoteApp = () => {
                 </div>
             </div>
 
-            <div className="modal fade" id="alterTaskModal" tabIndex={-1} aria-labelledby="addTaskModalLabel" aria-hidden="true">
-                <div className="modal-dialog">
-                    <div className="modal-content">
-                        <div className="modal-header">
-                            <h5 className="modal-title" id="addTaskModalLabel">Alterar tarefa</h5>
-                            <button type="button" className="close" data-dismiss="modal" aria-label="Close">
-                                <span aria-hidden="true">×</span>
-                            </button>
-                        </div>
-                        <div className="modal-body">
-                            <form onSubmit={createTask} id="form_add_task">
-                                <div className="form-group">
-                                    <label htmlFor="alter_title" className="col-form-label">Título da tarefa:</label>
-                                    <input type="text" className="form-control" id="alter_title" name="alter_title" value={onChangeFieldsAlterTask.title} onChange={onChangeFieldsAddTask} required />
-                                </div>
-                                <div className="form-group">
-                                    <label htmlFor="alter_requester_name" className="col-form-label">Nome do solicitante:</label>
-                                    <input type="text" className="form-control" id="alter_requester_name" name="alter_requester_name" value={onChangeFieldsAlterTask.requester_name} onChange={onChangeFieldsAddTask} required />
-                                </div>
-                                <div className="form-group">
-                                    <label htmlFor="alter_requester_email" className="col-form-label">E-mail do solicitante:</label>
-                                    <input type="email" className="form-control" id="alter_requester_email" name="alter_requester_email" value={onChangeFieldsAlterTask.requester_email} onChange={onChangeFieldsAddTask} required />
-                                </div>
-                                <div className="form-group">
-                                    <label htmlFor="alter_description" className="col-form-label">Descrição:</label>
-                                    <textarea className="form-control" id="alter_description" name="alter_description" value={onChangeFieldsAlterTask.description} onChange={onChangeFieldsAddTask} defaultValue={""} required />
-                                </div>
-                                <div className="form-group">
-                                    <label htmlFor="alter_comment" className="col-form-label">Comentário:</label>
-                                    <textarea className="form-control" id="alter_comment" name="alter_comment" value={onChangeFieldsAlterTask.comment} onChange={onChangeFieldsAddTask} defaultValue={""} required />
-                                </div>
-                                <div className="form-group">
-                                    <label htmlFor="alter_due_date" className="col-form-label">Prazo:</label>
-                                    <input type="datetime-local" className="form-control" id="alter_due_date" name="alter_due_date" min="1900-01-01T00:00" max="2099-12-31T00:00" value={onChangeFieldsAlterTask.due_date} onChange={onChangeFieldsAddTask} required />
-                                </div>
-                                <button type="button" className="btn btn-sm btn-secondary" data-dismiss="modal">Fechar</button>
-                                <button type="submit" className="btn btn-sm btn-success float-right">Salvar</button>
-                            </form>
-                        </div>
-                    </div>
-                </div>
-            </div>
 
-        
+            <Modal
+                isOpen={openIsModalAlter}
+                onRequestClose={closeModalAlter}
+                style={customStyles}
+            >
+
+                <h2>Editar tarefa</h2>
+                <form onSubmit={updateTask} id="form_update_task">
+                    <input type="hidden" name="alter_id" id="alter_id" value={fieldsTasksAlter.alter_id} onChange={onChangeFieldsAlterTask} />
+                    <div className="form-group">
+                        <label htmlFor="alter_title" className="col-form-label">Título da tarefa:</label>
+                        <input type="text" className="form-control" id="alter_title" name="alter_title" value={fieldsTasksAlter.alter_title} onChange={onChangeFieldsAlterTask} required />
+                    </div>
+                    <div className="form-group">
+                        <label htmlFor="alter_requester_name" className="col-form-label">Nome do solicitante:</label>
+                        <input type="text" className="form-control" id="alter_requester_name" name="alter_requester_name" value={fieldsTasksAlter.alter_requester_name} onChange={onChangeFieldsAlterTask} required />
+                    </div>
+                    <div className="form-group">
+                        <label htmlFor="alter_requester_email" className="col-form-label">E-mail do solicitante:</label>
+                        <input type="email" className="form-control" id="alter_requester_email" name="alter_requester_email" value={fieldsTasksAlter.alter_requester_email} onChange={onChangeFieldsAlterTask} required />
+                    </div>
+                    <div className="form-group">
+                        <label htmlFor="alter_description" className="col-form-label">Descrição:</label>
+                        <textarea className="form-control" id="alter_description" name="alter_description" value={fieldsTasksAlter.alter_description} onChange={onChangeFieldsAlterTask} required />
+                    </div>
+                    <div className="form-group">
+                        <label htmlFor="alter_comment" className="col-form-label">Comentário:</label>
+                        <textarea className="form-control" id="alter_comment" name="alter_comment" value={fieldsTasksAlter.alter_comment} onChange={onChangeFieldsAlterTask} required />
+                    </div>
+                    <div className="form-group">
+                        <label htmlFor="alter_due_date" className="col-form-label">Prazo:</label>
+                        <input type="datetime-local" className="form-control" id="alter_due_date" name="alter_due_date" min="1900-01-01T00:00" max="2099-12-31T00:00" value={fieldsTasksAlter.alter_due_date} onChange={onChangeFieldsAlterTask} required />
+                    </div>
+                    <button type="button" className="btn btn-sm btn-secondary" onClick={closeModalAlter}>Fechar</button>
+                    <button type="submit" className="btn btn-sm btn-success float-right">Salvar</button>
+                </form>
+
+            </Modal>
 
         </>
 

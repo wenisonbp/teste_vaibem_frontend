@@ -19,7 +19,7 @@ const Sidebar = () => {
                             <img src={UserPerfil} className="img-circle elevation-2" alt="UserPerfil" />
                         </div>
                         <div className="info">
-                            <Link to="#" className="d-block">Usuário:</Link>
+                            <Link to="#" className="d-block">Sistema VAIBEM</Link>
                         </div>
                     </div>
                     <nav className="mt-2">
@@ -37,14 +37,6 @@ const Sidebar = () => {
                                     <i className="nav-icon fas fa-tasks" />
                                     <p>
                                         Tarefas
-                                    </p>
-                                </NavLink>
-                            </li>
-                            <li className="nav-item">
-                                <NavLink to="/dashboards" className="nav-link" activeClassName="active">
-                                    <i className="nav-icon fas fa-tachometer-alt" />
-                                    <p>
-                                        Dashboards
                                     </p>
                                 </NavLink>
                             </li>
