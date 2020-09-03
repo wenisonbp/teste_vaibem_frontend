@@ -1,0 +1,4 @@
+.sidebar-dark-indigo .nav-sidebar>.nav-item>.nav-link.active, .sidebar-light-indigo .nav-sidebar>.nav-item>.nav-link.active {
+    background-color: #7b18c1;
+    color: #fff;
+}
