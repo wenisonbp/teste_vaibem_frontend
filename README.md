@@ -21,7 +21,7 @@ Teste Vai Bem - Frontend
 
 ## Notas
 
-- Both microservices are not restricted to communicate with API only.
+- Este projeto foi desenvolvimento a partir de um processo seletivo para a empresa [Vai Bem](https://cartaovaibem.com.br/).
 
 
 ## Dependências
