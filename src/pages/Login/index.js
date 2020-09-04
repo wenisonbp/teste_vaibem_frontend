@@ -50,7 +50,7 @@ const Login = () => {
 
 
     return (
-        <div className="d-flex justify-content-center pt-5 content-login">
+        <div className="d-flex justify-content-center content-login">
             <div className="login-box d-flex align-items-center">
                 <div className="card">
                     <div className="card-body login-card-body">
