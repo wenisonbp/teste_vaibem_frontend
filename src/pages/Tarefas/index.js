@@ -29,9 +29,7 @@ const Tarefas = () => {
                 <section className="content">
                     <div className="container-fluid">
                         <div className="row">
-                            <div className="col-md-12">
                                 <Drag></Drag>
-                            </div>
                         </div>
                     </div>
                 </section>
