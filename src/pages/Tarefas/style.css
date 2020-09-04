@@ -12,6 +12,7 @@ html, body {
 
 .task-container{
     overflow: auto;
+    min-height: 80vh;
 }
 
 .task-row{
