@@ -12,15 +12,12 @@ html, body {
 
 .content-login {
     height: 100%;
-    position: absolute;
+    position: absolute !important;
     width: 100%;
-}
-
-/* .justify-content-center{
-    background-image: url('/dist/img/family.jpg');
-    min-height: 100%;
+    background-image: url("/img/family_login.jpg");
+    min-height: 380px;
     background-position: center;
     background-repeat: no-repeat;
     background-size: cover;
     position: relative;
-} */
+}
