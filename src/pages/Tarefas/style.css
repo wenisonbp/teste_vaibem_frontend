@@ -10,3 +10,11 @@ html, body {
     width: 100%;
 }
 
+.task-container{
+    overflow: auto;
+}
+
+.task-row{
+    display: inline-flex;
+    flex-wrap: inherit;
+}
