@@ -27,8 +27,7 @@ const customStyles = {
         minWidth: '50%',
         marginRight: '-50%',
         transform: 'translate(-50%, -50%)',
-        margin: '15px',
-        marginTop: '50px'
+        margin: '50px 0px'
     },
     overlay: {
         zIndex: 2000,
