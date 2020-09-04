@@ -18,4 +18,5 @@ html, body {
 .task-row{
     display: inline-flex;
     flex-wrap: inherit;
+    min-height: 80vh;
 }
