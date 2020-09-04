@@ -4,7 +4,7 @@ import React, { useState } from 'react';
 import api from '@src/services/api';
 import { useHistory, Link } from "react-router-dom";
 import LogoVaiBem from '@public/dist/img/logo_vai_bem.png';
-import Family from '@public/dist/img/family2.jpg';
+import Family from '@public/dist/img/family.jpg';
 import './style.css';
 
 
