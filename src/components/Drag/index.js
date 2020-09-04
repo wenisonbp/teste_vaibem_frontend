@@ -26,11 +26,13 @@ const customStyles = {
         bottom: 'auto',
         minWidth: '50%',
         marginRight: '-50%',
-        transform: 'translate(-50%, -50%)'
+        transform: 'translate(-50%, -50%)',
+        margin: '15px'
     },
     overlay: {
         zIndex: 2000,
-        backgroundColor: 'rgba(0, 0, 0, 0.75)'
+        backgroundColor: 'rgba(0, 0, 0, 0.75)',
+        overflow: 'auto'
     }
 };
 
