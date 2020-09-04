@@ -36,12 +36,12 @@ const Navbar = () => {
                     <li className="nav-item">
                         <Link className="nav-link" data-widget="pushmenu" to="#"><i className="fas fa-bars" /></Link>
                     </li>
-                    <li className="nav-item d-none d-sm-inline-block">
+                    <li className="nav-item d-sm-inline-block">
                         <Link to="/home" className="nav-link">Home</Link>
                     </li>
                 </ul>
                 <ul className="navbar-nav ml-auto">
-                    <li className="nav-item d-none d-sm-inline-block">
+                    <li className="nav-item d-sm-inline-block">
                         <Link to="#" id="logoff_hde" className="nav-link" onClick={logoff}>Sair</Link>
                     </li>
                 </ul>
