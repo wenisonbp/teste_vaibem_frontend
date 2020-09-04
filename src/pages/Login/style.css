@@ -10,6 +10,12 @@ html, body {
     width: 100%;
 }
 
+.content-login {
+    height: 100%;
+    position: absolute;
+    width: 100%;
+}
+
 /* .justify-content-center{
     background-image: url('/dist/img/family.jpg');
     min-height: 100%;
